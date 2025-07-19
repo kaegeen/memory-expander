@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Memory Expander</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex flex-col items-center p-6 min-h-screen">
+
+  <h1 class="text-2xl font-bold mb-4">🧠 Memory Expander</h1>
+  <p class="mb-4">Memorize the pattern, then try to recreate it!</p>
+
+  <div id="grid" class="grid grid-cols-4 gap-2 mb-4"></div>
+  <button id="startBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Start</button>
+  <div id="result" class="mt-4 text-lg font-semibold"></div>
+
+  <script>
+    const gridSize = 16;
+    let activeCells = new Set();
+    let userGuesses = new Set();
+    const grid = document.getElementById('grid');
+    const result = document.getElementById('result');
+
+    function generateGrid() {
+      grid.innerHTML = '';
+      for (let i = 0; i < gridSize; i++) {
+        const cell = document.createElement('div');
+        cell.className = "w-16 h-16 bg-white border rounded cursor-pointer";
+        cell.dataset.index = i;
+        cell.onclick = () => {
+          if (!activeCells.size) {
+            cell.classList.toggle('bg-blue-300');
+            if (userGuesses.has(i)) {
+              userGuesses.delete(i);
+            } else {
+              userGuesses.add(i);
+            }
+          }
+        };
+        grid.appendChild(cell);
+      }
+    }
+
+    function showPattern() {
+      activeCells = new Set();
+      while (activeCells.size < 4) {
+        activeCells.add(Math.floor(Math.random() * gridSize));
+      }
+      const cells = grid.children;
+      activeCells.forEach(i => cells[i].classList.add('bg-green-400'));
+      setTimeout(() => {
+        activeCells.forEach(i => cells[i].classList.remove('bg-green-400'));
+      }, 2000);
+    }
+
+    document.getElementById('startBtn').onclick = () => {
+      userGuesses.clear();
+      result.textContent = '';
+      generateGrid();
+      setTimeout(showPattern, 100);
+      setTimeout(() => {
+        const button = document.createElement('button');
+        button.textContent = 'Submit';
+        button.className = 'mt-4 bg-green-500 text-white px-4 py-2 rounded';
+        button.onclick = () => {
+          const correct = [...userGuesses].filter(i => activeCells.has(i)).length;
+          result.textContent = `You got ${correct}/4 correct`;
+          button.remove();
+        };
+        document.body.appendChild(button);
+      }, 2500);
+    };
+
+    generateGrid();
+  </script>
+</body>
+</html>
